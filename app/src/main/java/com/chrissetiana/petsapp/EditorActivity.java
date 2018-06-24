@@ -12,6 +12,9 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.chrissetiana.petsapp.data.PetContract;
+import com.chrissetiana.petsapp.data.PetContract.PetEntry;
+
 public class EditorActivity extends AppCompatActivity {
 
     private EditText name, breed, weight;
@@ -32,9 +35,9 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void setupSpinner() {
-        ArrayAdapter genderSpinnerAdapter = ArrayAdapter.createFromResource(this, R.array.array_gender_options, android.R.layout.simple_spinner_item);
-        genderSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-        gender.setAdapter(genderSpinnerAdapter);
+        ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.array_gender_options, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        gender.setAdapter(adapter);
 
         gender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -42,11 +45,11 @@ public class EditorActivity extends AppCompatActivity {
                 String selection = (String) parent.getItemAtPosition(position);
                 if (!TextUtils.isEmpty(selection)) {
                     if (selection.equals(getString(R.string.gender_male))) {
-                        genderType = 1;
+                        genderType = PetEntry.GENDER_MALE;
                     } else if (selection.equals(getString(R.string.gender_female))) {
-                        genderType = 2;
+                        genderType = PetEntry.GENDER_FEMALE;
                     } else {
-                        genderType = 0;
+                        genderType = PetEntry.GENDER_UNKNOWN;
                     }
                 }
             }
