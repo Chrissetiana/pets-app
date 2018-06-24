@@ -1,12 +1,18 @@
 package com.chrissetiana.petsapp;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
+
+import com.chrissetiana.petsapp.data.PetContract.PetEntry;
+import com.chrissetiana.petsapp.data.PetDbHelper;
 
 public class CatalogActivity extends AppCompatActivity {
 
@@ -23,6 +29,21 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        displayDatabaseInfo();
+    }
+
+    private void displayDatabaseInfo() {
+        PetDbHelper helper = new PetDbHelper(this);
+        SQLiteDatabase db = helper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
+        try {
+            TextView text = findViewById(R.id.text_view_pet);
+            text.setText("Number of rows in pets database table: " + cursor.getCount());
+        } finally {
+            cursor.close();
+        }
     }
 
     @Override

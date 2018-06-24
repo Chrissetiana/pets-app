@@ -12,7 +12,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import com.chrissetiana.petsapp.data.PetContract;
 import com.chrissetiana.petsapp.data.PetContract.PetEntry;
 
 public class EditorActivity extends AppCompatActivity {
