@@ -60,10 +60,28 @@ public class CatalogActivity extends AppCompatActivity {
                 null,
                 null,
                 null);
-        // Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
+
+        TextView text = findViewById(R.id.text_view_pet);
+
         try {
-            TextView text = findViewById(R.id.text_view_pet);
-            text.setText("Number of rows in pets database table: " + cursor.getCount());
+            text.setText("Number of rows in pets database table: " + cursor.getCount() + "\n\n");
+            text.append(PetEntry._ID + " - " + PetEntry.COLUMN_PET_NAME + " - " + PetEntry.COLUMN_PET_BREED + " - " + PetEntry.COLUMN_PET_GENDER + " - " + PetEntry.COLUMN_PET_WEIGHT + "\n");
+
+            int id_columnIndex = cursor.getColumnIndex(PetEntry._ID);
+            int name_columnIndex = cursor.getColumnIndex((PetEntry.COLUMN_PET_NAME));
+            int breed_columnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
+            int gender_columnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
+            int weight_columnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
+
+            while ((cursor.moveToNext())) {
+                int currId = cursor.getInt(id_columnIndex);
+                String currName = cursor.getString(name_columnIndex);
+                String currBreed = cursor.getString(breed_columnIndex);
+                String currGender = cursor.getString(gender_columnIndex);
+                int currWeight = cursor.getInt(weight_columnIndex);
+
+                text.append("\n" + currId + " - " + currName + " - " + currBreed + " - " + currGender + " - " + currWeight);
+            }
         } finally {
             cursor.close();
         }
