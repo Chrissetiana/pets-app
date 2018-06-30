@@ -38,8 +38,13 @@ public class CatalogActivity extends AppCompatActivity {
         SQLiteDatabase db = helper.getReadableDatabase();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        displayDatabaseInfo();
+    }
+
     private void displayDatabaseInfo() {
-        PetDbHelper helper = new PetDbHelper(this);
         SQLiteDatabase db = helper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
@@ -61,7 +66,7 @@ public class CatalogActivity extends AppCompatActivity {
         values.put(PetEntry.COLUMN_PET_WEIGHT, 7);
 
         long newRow = db.insert(PetEntry.TABLE_NAME, null, values);
-        Log.wtf("CatalogActivity", "New row id: " + newRow);
+        Log.v("CatalogActivity", "New row id: " + newRow);
     }
 
     @Override

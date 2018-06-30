@@ -9,7 +9,7 @@ import com.chrissetiana.petsapp.data.PetContract.PetEntry;
 public class PetDbHelper extends SQLiteOpenHelper {
 
     private static final int DB_VERSION = 1;
-    private static final String DB_NAME = "pets.db";
+    private static final String DB_NAME = "shelter.db";
 
     public PetDbHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
