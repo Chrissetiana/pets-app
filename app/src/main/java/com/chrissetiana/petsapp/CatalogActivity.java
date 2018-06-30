@@ -47,7 +47,20 @@ public class CatalogActivity extends AppCompatActivity {
     private void displayDatabaseInfo() {
         SQLiteDatabase db = helper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
+//        String[] projection = { }; // columns to select
+//        String selection = // where clause: column + symbol "=?";
+//        String[] args = { }; // where clause: data to filter
+
+        Cursor cursor = db.query(
+                PetEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        // Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
         try {
             TextView text = findViewById(R.id.text_view_pet);
             text.setText("Number of rows in pets database table: " + cursor.getCount());
