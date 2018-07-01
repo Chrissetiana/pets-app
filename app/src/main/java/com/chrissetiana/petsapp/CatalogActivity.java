@@ -47,10 +47,6 @@ public class CatalogActivity extends AppCompatActivity {
     private void displayDatabaseInfo() {
         SQLiteDatabase db = helper.getReadableDatabase();
 
-//        String[] projection = { }; // columns to select
-//        String selection = // where clause: column + symbol "=?";
-//        String[] args = { }; // where clause: data to filter
-
         Cursor cursor = db.query(
                 PetEntry.TABLE_NAME,
                 null,
@@ -59,7 +55,8 @@ public class CatalogActivity extends AppCompatActivity {
                 null,
                 null,
                 null,
-                null);
+                null
+        );
 
         TextView text = findViewById(R.id.text_view_pet);
 
