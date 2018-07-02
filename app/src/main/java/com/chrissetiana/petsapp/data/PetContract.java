@@ -7,7 +7,7 @@ public final class PetContract {
 
     public static final String CONTENT_AUTHORITY = "com.chrissetiana.petsapp";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
-    public static final String PATH_PETS = "pets";
+    public static final String PATH_NAME = "pets";
 
     private PetContract() {
 
@@ -15,7 +15,7 @@ public final class PetContract {
 
     public static final class PetEntry implements BaseColumns {
 
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_PETS);
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_NAME);
 
         public static final String TABLE_NAME = "pets";
 
