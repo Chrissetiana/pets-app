@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,8 +17,6 @@ import android.widget.Toast;
 
 import com.chrissetiana.petsapp.data.PetContract.PetEntry;
 import com.chrissetiana.petsapp.data.PetDbHelper;
-
-import org.w3c.dom.Text;
 
 public class EditorActivity extends AppCompatActivity {
 
@@ -82,8 +79,8 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetEntry.COLUMN_PET_WEIGHT, weight);
 
         long newRow = db.insert(PetEntry.TABLE_NAME, null, values);
-        
-        if(newRow == -1) {
+
+        if (newRow == -1) {
             Toast.makeText(this, "Error with saving pet.", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Pet saved with id " + newRow, Toast.LENGTH_SHORT).show();

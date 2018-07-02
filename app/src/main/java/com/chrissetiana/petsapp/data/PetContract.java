@@ -5,13 +5,13 @@ import android.provider.BaseColumns;
 
 public final class PetContract {
 
-    private PetContract() {
-
-    }
-
     public static final String CONTENT_AUTHORITY = "com.chrissetiana.petsapp";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     public static final String PATH_PETS = "pets";
+
+    private PetContract() {
+
+    }
 
     public static final class PetEntry implements BaseColumns {
 

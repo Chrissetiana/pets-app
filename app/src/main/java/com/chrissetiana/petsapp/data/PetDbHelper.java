@@ -4,8 +4,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.chrissetiana.petsapp.data.PetContract.PetEntry;
-
 public class PetDbHelper extends SQLiteOpenHelper {
 
     private static final int DB_VERSION = 1;
