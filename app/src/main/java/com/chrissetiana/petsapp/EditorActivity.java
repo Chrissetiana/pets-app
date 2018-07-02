@@ -1,7 +1,9 @@
 package com.chrissetiana.petsapp;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -69,21 +71,17 @@ public class EditorActivity extends AppCompatActivity {
         String breed = breedText.getText().toString().trim();
         int weight = Integer.parseInt(weightText.getText().toString().trim());
 
-        PetDbHelper helper = new PetDbHelper(this);
-        SQLiteDatabase db = helper.getWritableDatabase();
-
         ContentValues values = new ContentValues();
         values.put(PetEntry.COLUMN_PET_NAME, name);
         values.put(PetEntry.COLUMN_PET_BREED, breed);
         values.put(PetEntry.COLUMN_PET_GENDER, genderType);
         values.put(PetEntry.COLUMN_PET_WEIGHT, weight);
 
-        long newRow = db.insert(PetEntry.TABLE_NAME, null, values);
-
-        if (newRow == -1) {
-            Toast.makeText(this, "Error with saving pet.", Toast.LENGTH_SHORT).show();
+        Uri uri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
+        if (uri == null) {
+            Toast.makeText(this, "Error saving pet", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Pet saved with id " + newRow, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Pet saved", Toast.LENGTH_SHORT).show();
         }
     }
 
