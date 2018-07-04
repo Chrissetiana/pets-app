@@ -128,31 +128,39 @@ public class PetProvider extends ContentProvider {
         }
     }
 
-        @Override
-        public String getType (Uri uri){
-            return null;
+    @Override
+    public String getType(Uri uri) {
+        final int match = uriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return PetEntry.CONTENT_LIST_TYPE;
+            case PET_ID:
+                return PetEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
         }
+    }
 
-        private void dataValidation (ContentValues values){
-            if (values.size() > 0) {
-                if (values.containsKey(PetEntry.COLUMN_PET_NAME)) {
-                    String name = values.getAsString(PetEntry.COLUMN_PET_NAME);
-                    if (name == null) {
-                        throw new IllegalArgumentException("Pet requires a name");
-                    }
+    private void dataValidation(ContentValues values) {
+        if (values.size() > 0) {
+            if (values.containsKey(PetEntry.COLUMN_PET_NAME)) {
+                String name = values.getAsString(PetEntry.COLUMN_PET_NAME);
+                if (name == null) {
+                    throw new IllegalArgumentException("Pet requires a name");
                 }
-                if (values.containsKey(PetEntry.COLUMN_PET_GENDER)) {
-                    Integer gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER);
-                    if (gender == null || !PetEntry.isValidGender(gender)) {
-                        throw new IllegalArgumentException("Pet requires valid gender");
-                    }
+            }
+            if (values.containsKey(PetEntry.COLUMN_PET_GENDER)) {
+                Integer gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER);
+                if (gender == null || !PetEntry.isValidGender(gender)) {
+                    throw new IllegalArgumentException("Pet requires valid gender");
                 }
-                if (values.containsKey(PetEntry.COLUMN_PET_WEIGHT)) {
-                    Integer weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
-                    if (weight != null && weight < 0) {
-                        throw new IllegalArgumentException("Pet requires valid weight");
-                    }
+            }
+            if (values.containsKey(PetEntry.COLUMN_PET_WEIGHT)) {
+                Integer weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
+                if (weight != null && weight < 0) {
+                    throw new IllegalArgumentException("Pet requires valid weight");
                 }
             }
         }
     }
+}
