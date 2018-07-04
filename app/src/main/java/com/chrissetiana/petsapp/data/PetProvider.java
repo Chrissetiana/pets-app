@@ -74,7 +74,31 @@ public class PetProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        dataValidation(values);
+
+        SQLiteDatabase database = helper.getWritableDatabase();
+
+        int match = uriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                long id = database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
+                if (id == -1) {
+                    Log.e(LOG_TAG, "Failed to update table");
+                } else {
+                    Log.v(LOG_TAG, "Table successfully updated");
+                }
+            case PET_ID:
+                selection = PetEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                id = database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
+                if (id == -1) {
+                    Log.e(LOG_TAG, "Failed to update row for " + uri);
+                } else {
+                    Log.v(LOG_TAG, "Row " + id + " successfully updated");
+                }
+            default:
+                throw new IllegalArgumentException("Update is not supported for " + uri);
+        }
     }
 
     @Override
