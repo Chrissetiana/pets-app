@@ -10,7 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ListView;
 
 import com.chrissetiana.petsapp.data.PetContract.PetEntry;
 
@@ -28,6 +28,10 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        ListView list = findViewById(R.id.pet_list);
+        View emptyView = findViewById(R.id.empty_view);
+        list.setEmptyView(emptyView);
     }
 
     @Override
@@ -37,34 +41,19 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     private void displayDatabaseInfo() {
-        String[] projection = {PetEntry._ID, PetEntry.COLUMN_PET_NAME, PetEntry.COLUMN_PET_BREED, PetEntry.COLUMN_PET_GENDER, PetEntry.COLUMN_PET_WEIGHT};
+        String[] projection = {
+                PetEntry._ID,
+                PetEntry.COLUMN_PET_NAME,
+                PetEntry.COLUMN_PET_BREED,
+                PetEntry.COLUMN_PET_GENDER,
+                PetEntry.COLUMN_PET_WEIGHT
+        };
 
         Cursor cursor = getContentResolver().query(PetEntry.CONTENT_URI, projection, null, null, null);
 
-        TextView text = findViewById(R.id.text_view_pet);
-
-        try {
-            text.setText("Number of rows in pets database table: " + cursor.getCount() + "\n\n");
-            text.append(PetEntry._ID + " - " + PetEntry.COLUMN_PET_NAME + " - " + PetEntry.COLUMN_PET_BREED + " - " + PetEntry.COLUMN_PET_GENDER + " - " + PetEntry.COLUMN_PET_WEIGHT + "\n");
-
-            int id_columnIndex = cursor.getColumnIndex(PetEntry._ID);
-            int name_columnIndex = cursor.getColumnIndex((PetEntry.COLUMN_PET_NAME));
-            int breed_columnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
-            int gender_columnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
-            int weight_columnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
-
-            while ((cursor.moveToNext())) {
-                int currId = cursor.getInt(id_columnIndex);
-                String currName = cursor.getString(name_columnIndex);
-                String currBreed = cursor.getString(breed_columnIndex);
-                String currGender = cursor.getString(gender_columnIndex);
-                int currWeight = cursor.getInt(weight_columnIndex);
-
-                text.append("\n" + currId + " - " + currName + " - " + currBreed + " - " + currGender + " - " + currWeight);
-            }
-        } finally {
-            cursor.close();
-        }
+        ListView list = findViewById(R.id.pet_list);
+        PetsAdapter adapter = new PetsAdapter(this, cursor);
+        list.setAdapter(adapter);
     }
 
     private void insertPet() {
