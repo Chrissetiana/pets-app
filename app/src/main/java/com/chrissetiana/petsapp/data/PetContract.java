@@ -14,7 +14,6 @@ public final class PetContract {
     }
 
     public static final class PetEntry implements BaseColumns {
-
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_NAME);
 
         public static final String TABLE_NAME = "pets";
@@ -28,5 +27,12 @@ public final class PetContract {
         public static final int GENDER_UNKNOWN = 0;
         public static final int GENDER_MALE = 1;
         public static final int GENDER_FEMALE = 2;
+
+        public static boolean isValidGender(int gender) {
+            if (gender == GENDER_UNKNOWN || gender == GENDER_MALE || gender == GENDER_FEMALE) {
+                return true;
+            }
+            return false;
+        }
     }
 }

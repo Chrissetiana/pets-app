@@ -13,7 +13,7 @@ import com.chrissetiana.petsapp.data.PetContract.PetEntry;
 
 public class PetProvider extends ContentProvider {
 
-    public static final String LOG_TAG = PetProvider.class.getSimpleName();
+    private static final String LOG_TAG = PetProvider.class.getSimpleName();
     private static final int PETS = 100;
     private static final int PET_ID = 101;
     private static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -53,13 +53,15 @@ public class PetProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues contentValues) {
+    public Uri insert(Uri uri, ContentValues values) {
+        dataValidation(values);
+
         SQLiteDatabase db = helper.getWritableDatabase();
 
         int match = uriMatcher.match(uri);
         switch (match) {
             case PETS:
-                long id = db.insert(PetEntry.TABLE_NAME, null, contentValues);
+                long id = db.insert(PetEntry.TABLE_NAME, null, values);
                 if (id == -1) {
                     Log.e(LOG_TAG, "Failed to insert row for " + uri);
                     return null;
@@ -71,7 +73,7 @@ public class PetProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
     }
 
@@ -83,5 +85,28 @@ public class PetProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         return null;
+    }
+
+    private void dataValidation(ContentValues values) {
+        if (values.size() > 0) {
+            if (values.containsKey(PetEntry.COLUMN_PET_NAME)) {
+                String name = values.getAsString(PetEntry.COLUMN_PET_NAME);
+                if (name == null) {
+                    throw new IllegalArgumentException("Pet requires a name");
+                }
+            }
+            if (values.containsKey(PetEntry.COLUMN_PET_GENDER)) {
+                Integer gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER);
+                if (gender == null || !PetEntry.isValidGender(gender)) {
+                    throw new IllegalArgumentException("Pet requires valid gender");
+                }
+            }
+            if (values.containsKey(PetEntry.COLUMN_PET_WEIGHT)) {
+                Integer weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
+                if (weight != null && weight < 0) {
+                    throw new IllegalArgumentException("Pet requires valid weight");
+                }
+            }
+        }
     }
 }
