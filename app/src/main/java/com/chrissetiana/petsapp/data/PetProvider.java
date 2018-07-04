@@ -83,9 +83,9 @@ public class PetProvider extends ContentProvider {
             case PETS:
                 long id = database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
                 if (id == -1) {
-                    Log.e(LOG_TAG, "Failed to update table");
+                    Log.e(LOG_TAG, "Failed to update");
                 } else {
-                    Log.v(LOG_TAG, "Table successfully updated");
+                    Log.v(LOG_TAG, "Successfully updated " + id + " rows");
                 }
             case PET_ID:
                 selection = PetEntry._ID + "=?";
@@ -103,34 +103,56 @@ public class PetProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        SQLiteDatabase database = helper.getWritableDatabase();
+
+        int match = uriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                long id = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+                if (id == -1) {
+                    Log.e(LOG_TAG, "Failed to delete");
+                } else {
+                    Log.v(LOG_TAG, "Successfully deleted " + id + " rows");
+                }
+            case PET_ID:
+                selection = PetEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                id = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+                if (id == -1) {
+                    Log.e(LOG_TAG, "Failed to delete row for " + uri);
+                } else {
+                    Log.v(LOG_TAG, "Row " + id + " successfully deleted");
+                }
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+        }
     }
 
-    @Override
-    public String getType(Uri uri) {
-        return null;
-    }
+        @Override
+        public String getType (Uri uri){
+            return null;
+        }
 
-    private void dataValidation(ContentValues values) {
-        if (values.size() > 0) {
-            if (values.containsKey(PetEntry.COLUMN_PET_NAME)) {
-                String name = values.getAsString(PetEntry.COLUMN_PET_NAME);
-                if (name == null) {
-                    throw new IllegalArgumentException("Pet requires a name");
+        private void dataValidation (ContentValues values){
+            if (values.size() > 0) {
+                if (values.containsKey(PetEntry.COLUMN_PET_NAME)) {
+                    String name = values.getAsString(PetEntry.COLUMN_PET_NAME);
+                    if (name == null) {
+                        throw new IllegalArgumentException("Pet requires a name");
+                    }
                 }
-            }
-            if (values.containsKey(PetEntry.COLUMN_PET_GENDER)) {
-                Integer gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER);
-                if (gender == null || !PetEntry.isValidGender(gender)) {
-                    throw new IllegalArgumentException("Pet requires valid gender");
+                if (values.containsKey(PetEntry.COLUMN_PET_GENDER)) {
+                    Integer gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER);
+                    if (gender == null || !PetEntry.isValidGender(gender)) {
+                        throw new IllegalArgumentException("Pet requires valid gender");
+                    }
                 }
-            }
-            if (values.containsKey(PetEntry.COLUMN_PET_WEIGHT)) {
-                Integer weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
-                if (weight != null && weight < 0) {
-                    throw new IllegalArgumentException("Pet requires valid weight");
+                if (values.containsKey(PetEntry.COLUMN_PET_WEIGHT)) {
+                    Integer weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
+                    if (weight != null && weight < 0) {
+                        throw new IllegalArgumentException("Pet requires valid weight");
+                    }
                 }
             }
         }
     }
-}
