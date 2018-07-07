@@ -2,6 +2,7 @@ package com.chrissetiana.petsapp;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +11,9 @@ import android.widget.TextView;
 
 import com.chrissetiana.petsapp.data.PetContract;
 
-public class PetsAdapter extends CursorAdapter {
+public class PetAdapter extends CursorAdapter {
 
-    public PetsAdapter(Context context, Cursor c) {
+    public PetAdapter(Context context, Cursor c) {
         super(context, c, 0);
     }
 
@@ -31,6 +32,10 @@ public class PetsAdapter extends CursorAdapter {
 
         String petName = cursor.getString(nameColumnIndex);
         String petSummary = cursor.getString(breedColumnIndex);
+
+        if (TextUtils.isEmpty(petSummary)) {
+            petSummary = context.getString(R.string.unknown_breed);
+        }
 
         pet_name.setText(petName);
         pet_summary.setText(petSummary);

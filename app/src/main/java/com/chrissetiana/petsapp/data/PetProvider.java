@@ -39,16 +39,17 @@ public class PetProvider extends ContentProvider {
         int match = uriMatcher.match(uri);
         switch (match) {
             case PETS:
-                cursor = db.query(PetContract.PetEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                cursor = db.query(PetEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
                 break;
             case PET_ID:
-                selection = PetContract.PetEntry._ID + "=?";
+                selection = PetEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                cursor = db.query(PetContract.PetEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                cursor = db.query(PetEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
                 break;
             default:
                 throw new IllegalArgumentException("Cannot query unknown uri" + uri);
         }
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
 
@@ -66,6 +67,7 @@ public class PetProvider extends ContentProvider {
                     Log.e(LOG_TAG, "Failed to insert row for " + uri);
                     return null;
                 }
+                getContext().getContentResolver().notifyChange(uri, null);
                 return ContentUris.withAppendedId(uri, id);
             default:
                 throw new IllegalArgumentException("Insertion is not supported for " + uri);
@@ -77,55 +79,51 @@ public class PetProvider extends ContentProvider {
         dataValidation(values);
 
         SQLiteDatabase database = helper.getWritableDatabase();
+        int num;
 
         int match = uriMatcher.match(uri);
         switch (match) {
             case PETS:
-                long id = database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
-                if (id == -1) {
-                    Log.e(LOG_TAG, "Failed to update");
-                } else {
-                    Log.v(LOG_TAG, "Successfully updated " + id + " rows");
-                }
+                num = database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
+                break;
             case PET_ID:
                 selection = PetEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                id = database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
-                if (id == -1) {
-                    Log.e(LOG_TAG, "Failed to update row for " + uri);
-                } else {
-                    Log.v(LOG_TAG, "Row " + id + " successfully updated");
-                }
+                num = database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Update is not supported for " + uri);
         }
+
+        if (num != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return num;
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase database = helper.getWritableDatabase();
+        int num;
 
         int match = uriMatcher.match(uri);
         switch (match) {
             case PETS:
-                long id = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
-                if (id == -1) {
-                    Log.e(LOG_TAG, "Failed to delete");
-                } else {
-                    Log.v(LOG_TAG, "Successfully deleted " + id + " rows");
-                }
+                num = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             case PET_ID:
                 selection = PetEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                id = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
-                if (id == -1) {
-                    Log.e(LOG_TAG, "Failed to delete row for " + uri);
-                } else {
-                    Log.v(LOG_TAG, "Row " + id + " successfully deleted");
-                }
+                num = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Deletion is not supported for " + uri);
         }
+
+        if (num != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return num;
     }
 
     @Override
