@@ -51,8 +51,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         if (uri == null) {
             setTitle(getString(R.string.editor_activity_title_new_pet));
+            invalidateOptionsMenu();
         } else {
             setTitle(getString(R.string.editor_activity_title_edit_pet));
+            getLoaderManager().initLoader(LOADER_ID, null, this);
         }
 
         nameText = findViewById(R.id.edit_pet_name);
@@ -60,14 +62,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         weightText = findViewById(R.id.edit_pet_weight);
         gender = findViewById(R.id.spinner_gender);
 
-        setupSpinner();
-
         nameText.setOnTouchListener(touchListener);
         breedText.setOnTouchListener(touchListener);
         weightText.setOnTouchListener(touchListener);
         gender.setOnTouchListener(touchListener);
 
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        setupSpinner();
     }
 
     private void setupSpinner() {
@@ -134,6 +134,28 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
+    private void deletePet() {
+        if (uri != null) {
+            int rows = getContentResolver().delete(uri, null, null);
+            if (rows == 0) {
+                Toast.makeText(this, getString(R.string.editor_delete_pet_failed), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.editor_delete_pet_successful), Toast.LENGTH_SHORT).show();
+            }
+            finish();
+        }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        if (uri == null) {
+            MenuItem menuItem = menu.findItem(R.id.action_delete);
+            menuItem.setVisible(false);
+        }
+        return true;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_editor, menu);
@@ -148,6 +170,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 finish();
                 return true;
             case R.id.action_delete:
+                confirmOnDeleteDialog();
                 return true;
             case android.R.id.home:
                 if (!hasChanged) {
@@ -160,7 +183,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                         NavUtils.navigateUpFromSameTask(EditorActivity.this);
                     }
                 };
-                confirmationDialog(discardButtonClickListener);
+                confirmOnExitDialog(discardButtonClickListener);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -186,6 +209,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (cursor == null || cursor.getCount() < 1) {
+            return;
+        }
+
         if (cursor.moveToFirst()) {
             int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
             int breedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
@@ -213,12 +240,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                     break;
             }
         }
-
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        nameText.setText("");
+        breedText.setText("");
+        weightText.setText("");
+        gender.setSelection(0);
     }
 
     @Override
@@ -232,19 +261,38 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        // User clicked "Discard" button, close the current activity.
                         finish();
                     }
                 };
 
-        confirmationDialog(discardButtonClickListener);
+        confirmOnExitDialog(discardButtonClickListener);
     }
 
-    private void confirmationDialog(DialogInterface.OnClickListener discardButtonClickListener) {
+    private void confirmOnExitDialog(DialogInterface.OnClickListener discardButtonClickListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.unsaved_changes_dialog_msg);
         builder.setPositiveButton(R.string.discard, discardButtonClickListener);
         builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void confirmOnDeleteDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                deletePet();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 if (dialog != null) {
                     dialog.dismiss();

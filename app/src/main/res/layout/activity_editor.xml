@@ -61,7 +61,7 @@
                 android:layout_height="48dp"
                 android:paddingRight="@dimen/activity_margin"
                 android:spinnerMode="dropdown" />
-            
+
         </LinearLayout>
 
     </LinearLayout>
