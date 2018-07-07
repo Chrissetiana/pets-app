@@ -1,8 +1,11 @@
 package com.chrissetiana.petsapp;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
+import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -18,18 +21,28 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.chrissetiana.petsapp.data.PetContract.PetEntry;
-import com.chrissetiana.petsapp.data.PetDbHelper;
 
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final int LOADER_ID = 0;
+    private Uri uri;
     private EditText nameText, breedText, weightText;
     private Spinner gender;
-    private int genderType = 0;
+    private int genderType = PetEntry.GENDER_UNKNOWN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
+
+        Intent intent = getIntent();
+        uri = intent.getData();
+
+        if (uri == null) {
+            setTitle(getString(R.string.editor_activity_title_new_pet));
+        } else {
+            setTitle(getString(R.string.editor_activity_title_edit_pet));
+        }
 
         nameText = findViewById(R.id.edit_pet_name);
         breedText = findViewById(R.id.edit_pet_breed);
@@ -37,6 +50,8 @@ public class EditorActivity extends AppCompatActivity {
         gender = findViewById(R.id.spinner_gender);
 
         setupSpinner();
+
+        getLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     private void setupSpinner() {
@@ -61,15 +76,24 @@ public class EditorActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                genderType = 0;
+                genderType = PetEntry.GENDER_UNKNOWN;
             }
         });
     }
 
-    private void insertPet() {
+    private void savePet() {
         String name = nameText.getText().toString().trim();
         String breed = breedText.getText().toString().trim();
-        int weight = Integer.parseInt(weightText.getText().toString().trim());
+        String weightStr = weightText.getText().toString().trim();
+        int weight = 0;
+
+        if (uri == null && TextUtils.isEmpty(name) && TextUtils.isEmpty(breed) && TextUtils.isEmpty(weightStr) && genderType == PetEntry.GENDER_UNKNOWN) {
+            return;
+        }
+
+        if (!TextUtils.isEmpty(weightStr)) {
+            weight = Integer.parseInt(weightStr);
+        }
 
         ContentValues values = new ContentValues();
         values.put(PetEntry.COLUMN_PET_NAME, name);
@@ -77,11 +101,20 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetEntry.COLUMN_PET_GENDER, genderType);
         values.put(PetEntry.COLUMN_PET_WEIGHT, weight);
 
-        Uri uri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
         if (uri == null) {
-            Toast.makeText(this, "Error saving pet", Toast.LENGTH_SHORT).show();
+            Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
+            if (newUri == null) {
+                Toast.makeText(this, getString(R.string.editor_insert_pet_failed), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.editor_insert_pet_successful), Toast.LENGTH_SHORT).show();
+            }
         } else {
-            Toast.makeText(this, "Pet saved", Toast.LENGTH_SHORT).show();
+            int rows = getContentResolver().update(PetEntry.CONTENT_URI, values, null, null);
+            if (rows == 0) {
+                Toast.makeText(this, getString(R.string.editor_update_pet_failed), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.editor_update_pet_successful), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -95,7 +128,7 @@ public class EditorActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-                insertPet();
+                savePet();
                 finish();
                 return true;
             case R.id.action_delete:
@@ -106,4 +139,59 @@ public class EditorActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-} 
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        String[] projection = {
+                PetEntry._ID,
+                PetEntry.COLUMN_PET_NAME,
+                PetEntry.COLUMN_PET_BREED,
+                PetEntry.COLUMN_PET_GENDER,
+                PetEntry.COLUMN_PET_WEIGHT};
+        return new CursorLoader(
+                this,
+                uri,
+                projection,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (cursor.moveToFirst()) {
+            int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
+            int breedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
+            int genderColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
+            int weightColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
+
+            String name = cursor.getString(nameColumnIndex);
+            String breed = cursor.getString(breedColumnIndex);
+            int Gender = cursor.getInt(genderColumnIndex);
+            int weight = cursor.getInt(weightColumnIndex);
+
+            nameText.setText(name);
+            breedText.setText(breed);
+            weightText.setText(Integer.toString(weight));
+
+            switch (Gender) {
+                case PetEntry.GENDER_MALE:
+                    gender.setSelection(1);
+                    break;
+                case PetEntry.GENDER_FEMALE:
+                    gender.setSelection(2);
+                    break;
+                default:
+                    gender.setSelection(0);
+                    break;
+            }
+        }
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+}
