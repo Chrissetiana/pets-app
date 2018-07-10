@@ -125,7 +125,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 Toast.makeText(this, getString(R.string.editor_insert_pet_successful), Toast.LENGTH_SHORT).show();
             }
         } else {
-            int rows = getContentResolver().update(PetEntry.CONTENT_URI, values, null, null);
+            int rows = getContentResolver().update(uri, values, null, null);
             if (rows == 0) {
                 Toast.makeText(this, getString(R.string.editor_update_pet_failed), Toast.LENGTH_SHORT).show();
             } else {
@@ -197,6 +197,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 PetEntry.COLUMN_PET_BREED,
                 PetEntry.COLUMN_PET_GENDER,
                 PetEntry.COLUMN_PET_WEIGHT};
+
         return new CursorLoader(
                 this,
                 uri,
